@@ -94,6 +94,7 @@ impl Grapher {
         Ok(())
     }
 
+    #[allow(clippy::too_many_arguments)]
     fn generate_graph(
         &self,
         sensor_id: &str,
