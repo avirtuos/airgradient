@@ -1,0 +1,101 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ sensor.name }} — AirGradient Monitor{% endblock %}
+
+{% block content %}
+<h2>{{ sensor.name }}</h2>
+<p class="muted"><small>{{ sensor.base_url }} &nbsp;|&nbsp; Poll every {{ sensor.poll_interval_secs }}s</small></p>
+
+{% if let Some(r) = sensor.latest_reading %}
+<article>
+  <h4>Current Readings</h4>
+  <div class="readings-grid large">
+    <div class="reading">
+      <span class="label">PM1.0</span>
+      <span class="value">{% if let Some(v) = r.pm01 %}{{ format!("{:.1}", v) }} <small>ug/m3</small>{% else %}—{% endif %}</span>
+    </div>
+    <div class="reading">
+      <span class="label">PM2.5</span>
+      <span class="value">{% if let Some(v) = r.pm02 %}{{ format!("{:.1}", v) }} <small>ug/m3</small>{% else %}—{% endif %}</span>
+    </div>
+    <div class="reading">
+      <span class="label">PM10</span>
+      <span class="value">{% if let Some(v) = r.pm10 %}{{ format!("{:.1}", v) }} <small>ug/m3</small>{% else %}—{% endif %}</span>
+    </div>
+    <div class="reading">
+      <span class="label">CO₂</span>
+      <span class="value">{% if let Some(v) = r.rco2 %}{{ format!("{:.0}", v) }} <small>ppm</small>{% else %}—{% endif %}</span>
+    </div>
+    <div class="reading">
+      <span class="label">Temperature</span>
+      <span class="value">{% if let Some(v) = r.atmp %}{% if use_fahrenheit %}{{ format!("{:.1}", *v * 9.0 / 5.0 + 32.0) }} <small>°F</small>{% else %}{{ format!("{:.1}", *v) }} <small>°C</small>{% endif %}{% else %}—{% endif %}</span>
+    </div>
+    <div class="reading">
+      <span class="label">Humidity</span>
+      <span class="value">{% if let Some(v) = r.rhum %}{{ format!("{:.0}", v) }}<small>%</small>{% else %}—{% endif %}</span>
+    </div>
+    <div class="reading">
+      <span class="label">VOC Index</span>
+      <span class="value">{% if let Some(v) = r.tvoc_index %}{{ format!("{:.0}", v) }}{% else %}—{% endif %}</span>
+    </div>
+    <div class="reading">
+      <span class="label">NOx Index</span>
+      <span class="value">{% if let Some(v) = r.nox_index %}{{ format!("{:.0}", v) }}{% else %}—{% endif %}</span>
+    </div>
+    <div class="reading">
+      <span class="label">WiFi RSSI</span>
+      <span class="value">{% if let Some(v) = r.wifi %}{{ v }} <small>dBm</small>{% else %}—{% endif %}</span>
+    </div>
+    <div class="reading">
+      <span class="label">Firmware</span>
+      <span class="value">{% if let Some(v) = r.firmware %}{{ v }}{% else %}—{% endif %}</span>
+    </div>
+    <div class="reading">
+      <span class="label">Model</span>
+      <span class="value">{% if let Some(v) = r.model %}{{ v }}{% else %}—{% endif %}</span>
+    </div>
+    <div class="reading">
+      <span class="label">Serial</span>
+      <span class="value muted"><small>{% if let Some(v) = r.serialno %}{{ v }}{% else %}—{% endif %}</small></span>
+    </div>
+  </div>
+</article>
+{% endif %}
+
+<article>
+  <h4>Historical Graphs</h4>
+
+  <div class="tab-bar" id="range-tabs">
+    {% for range in ranges %}
+    <button class="tab-btn{% if loop.first %} active{% endif %}"
+            data-range="{{ range.slug() }}"
+            onclick="selectRange('{{ range.slug() }}', this)">
+      {{ range.label() }}
+    </button>
+    {% endfor %}
+  </div>
+
+  {% for range in ranges %}
+  <div class="range-panel" id="range-{{ range.slug() }}" {% if !loop.first %}style="display:none"{% endif %}>
+    {% for cat in categories %}
+    <h5>{{ cat.label() }}</h5>
+    <img src="/api/sensors/{{ sensor.id }}/graph/{{ cat.slug() }}/{{ range.slug() }}"
+         alt="{{ cat.label() }} {{ range.label() }}"
+         class="rrd-graph"
+         loading="lazy">
+    {% endfor %}
+  </div>
+  {% endfor %}
+</article>
+
+<p><a href="/explorer?sensor={{ sensor.id }}">Open in interactive Explorer &rarr;</a></p>
+
+<script>
+function selectRange(slug, btn) {
+  document.querySelectorAll('.range-panel').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('range-' + slug).style.display = '';
+  btn.classList.add('active');
+}
+</script>
+{% endblock %}

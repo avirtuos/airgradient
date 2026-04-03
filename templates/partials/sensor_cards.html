@@ -1,0 +1,47 @@
+<div class="grid">
+  {% for s in sensors %}
+  <article class="sensor-card{% if s.last_error.is_some() %} error{% endif %}">
+    <header>
+      <a href="/sensors/{{ s.id }}"><strong>{{ s.name }}</strong></a>
+      <span class="status-dot {% if s.last_seen.is_some() && s.last_error.is_none() %}online{% else %}offline{% endif %}"></span>
+    </header>
+    {% if let Some(r) = s.reading %}
+    <div class="readings-grid">
+      <div class="reading">
+        <span class="label">PM2.5</span>
+        <span class="value">{% if let Some(v) = r.pm02 %}{{ format!("{:.1}", v) }} <small>ug/m3</small>{% else %}—{% endif %}</span>
+      </div>
+      <div class="reading">
+        <span class="label">CO₂</span>
+        <span class="value">{% if let Some(v) = r.rco2 %}{{ format!("{:.0}", v) }} <small>ppm</small>{% else %}—{% endif %}</span>
+      </div>
+      <div class="reading">
+        <span class="label">Temp</span>
+        <span class="value">{% if let Some(v) = r.atmp %}{% if use_fahrenheit %}{{ format!("{:.1}", *v * 9.0 / 5.0 + 32.0) }} <small>°F</small>{% else %}{{ format!("{:.1}", *v) }} <small>°C</small>{% endif %}{% else %}—{% endif %}</span>
+      </div>
+      <div class="reading">
+        <span class="label">Humidity</span>
+        <span class="value">{% if let Some(v) = r.rhum %}{{ format!("{:.0}", v) }}<small>%</small>{% else %}—{% endif %}</span>
+      </div>
+      <div class="reading">
+        <span class="label">VOC</span>
+        <span class="value">{% if let Some(v) = r.tvoc_index %}{{ format!("{:.0}", v) }}{% else %}—{% endif %}</span>
+      </div>
+      <div class="reading">
+        <span class="label">NOx</span>
+        <span class="value">{% if let Some(v) = r.nox_index %}{{ format!("{:.0}", v) }}{% else %}—{% endif %}</span>
+      </div>
+    </div>
+    <img class="thumb-graph"
+         src="/api/sensors/{{ s.id }}/graph/pm/1h"
+         alt="1h particulate"
+         loading="lazy">
+    {% else %}
+    <p class="muted">{% if s.last_error.is_some() %}Error: {{ s.last_error.as_deref().unwrap_or("unknown") }}{% else %}Waiting for first reading…{% endif %}</p>
+    {% endif %}
+    <footer>
+      <small class="base-url muted">{{ s.base_url }}</small>
+    </footer>
+  </article>
+  {% endfor %}
+</div>

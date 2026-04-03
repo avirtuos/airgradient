@@ -1,0 +1,155 @@
+/* AirGradient Monitor — custom styles */
+
+nav a {
+  text-decoration: none;
+}
+
+/* Sensor card grid */
+.sensor-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sensor-card.error {
+  border-color: var(--pico-color-red-500);
+}
+
+.sensor-card header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0;
+}
+
+/* Status indicator dot */
+.status-dot {
+  display: inline-block;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: var(--pico-color-grey-400);
+}
+
+.status-dot.online {
+  background: var(--pico-color-green-500);
+}
+
+.status-dot.offline {
+  background: var(--pico-color-red-400);
+}
+
+/* Reading grid inside a sensor card */
+.readings-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.25rem 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.readings-grid.large {
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem 1rem;
+}
+
+.reading {
+  display: flex;
+  flex-direction: column;
+}
+
+.reading .label {
+  font-size: 0.7rem;
+  color: var(--pico-muted-color);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.reading .value {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.reading .value small {
+  font-size: 0.65rem;
+  font-weight: 400;
+  color: var(--pico-muted-color);
+}
+
+/* Thumbnail graph inside card */
+.thumb-graph {
+  display: block;
+  max-width: 100%;
+  margin-top: 0.25rem;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: var(--pico-border-radius);
+}
+
+/* Full-size RRD graph */
+.rrd-graph {
+  display: block;
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 1rem;
+  border-radius: var(--pico-border-radius);
+  background: #1a1a2e;
+}
+
+/* Tag badges */
+.tag {
+  display: inline-block;
+  padding: 0.1rem 0.4rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.tag.online  { background: var(--pico-color-green-900); color: var(--pico-color-green-300); }
+.tag.error   { background: var(--pico-color-red-900);   color: var(--pico-color-red-300); }
+.tag.muted   { background: var(--pico-color-grey-800);  color: var(--pico-color-grey-400); }
+
+/* Tab bar for sensor detail ranges */
+.tab-bar {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.tab-btn {
+  padding: 0.35rem 0.9rem;
+  font-size: 0.85rem;
+  border-radius: var(--pico-border-radius);
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid var(--pico-muted-border-color);
+  color: var(--pico-color);
+}
+
+.tab-btn.active {
+  background: var(--pico-primary);
+  color: var(--pico-primary-inverse);
+  border-color: var(--pico-primary);
+}
+
+.small {
+  font-size: 0.8rem;
+  padding: 0.25rem 0.6rem;
+}
+
+.base-url {
+  font-size: 0.75rem;
+  word-break: break-all;
+}
+
+.muted {
+  color: var(--pico-muted-color);
+}
+
+footer.container-fluid {
+  margin-top: 2rem;
+  padding: 1rem;
+  border-top: 1px solid var(--pico-muted-border-color);
+  text-align: center;
+}

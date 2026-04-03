@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}AirGradient Monitor{% endblock %}</title>
+  <link rel="stylesheet" href="/static/vendor/pico.min.css">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <script src="/static/vendor/htmx.min.js" defer></script>
+</head>
+<body>
+  <nav class="container-fluid">
+    <ul>
+      <li><strong><a href="/">&#127750; AirGradient</a></strong></li>
+    </ul>
+    <ul>
+      <li><a href="/">Dashboard</a></li>
+      <li><a href="/explorer">Explorer</a></li>
+      <li><a href="/settings">Settings</a></li>
+    </ul>
+  </nav>
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="container-fluid">
+    <small>AirGradient Monitor</small>
+  </footer>
+</body>
+</html>

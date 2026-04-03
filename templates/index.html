@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+
+{% block title %}Dashboard — AirGradient Monitor{% endblock %}
+
+{% block content %}
+<h2>Dashboard</h2>
+{% if sensors.is_empty() %}
+  <article>
+    <p>No sensors configured yet. <a href="/settings">Add a sensor</a> to get started.</p>
+  </article>
+{% else %}
+  <div id="sensor-cards"
+       hx-get="/partials/sensor-cards"
+       hx-trigger="every 30s"
+       hx-swap="innerHTML">
+    {% include "partials/sensor_cards.html" %}
+  </div>
+{% endif %}
+{% endblock %}

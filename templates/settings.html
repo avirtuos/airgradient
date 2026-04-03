@@ -1,0 +1,227 @@
+{% extends "layout.html" %}
+
+{% block title %}Settings — AirGradient Monitor{% endblock %}
+
+{% block content %}
+<h2>Settings</h2>
+
+<article>
+  <h4>Sensors</h4>
+
+  {% if sensors.is_empty() %}
+  <p class="muted">No sensors configured.</p>
+  {% else %}
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Base URL</th>
+        <th>Poll (s)</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in sensors %}
+      <tr id="row-{{ s.id }}">
+        <td>{{ s.name }}</td>
+        <td><code>{{ s.base_url }}</code></td>
+        <td>{{ s.poll_interval_secs }}</td>
+        <td>
+          {% if s.last_error.is_some() %}
+          <span class="tag error">Error</span>
+          {% else if s.last_seen.is_some() %}
+          <span class="tag online">Online</span>
+          {% else %}
+          <span class="tag muted">Pending</span>
+          {% endif %}
+        </td>
+        <td>
+          <button class="outline secondary small"
+                  onclick="editSensor('{{ s.id }}', '{{ s.name }}', '{{ s.base_url }}', {{ s.poll_interval_secs }}, {{ s.enabled }})">
+            Edit
+          </button>
+          <button class="outline contrast small"
+                  hx-delete="/api/sensors/{{ s.id }}"
+                  hx-confirm="Delete {{ s.name }}?"
+                  hx-target="#row-{{ s.id }}"
+                  hx-swap="outerHTML">
+            Delete
+          </button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+
+  <h5>Add Sensor</h5>
+  <form id="add-sensor-form" onsubmit="submitSensor(event)">
+    <div class="grid">
+      <label>
+        Name
+        <input type="text" id="new-name" placeholder="Living Room" required>
+      </label>
+      <label>
+        Base URL
+        <input type="url" id="new-url" placeholder="http://192.168.1.100" required>
+      </label>
+      <label>
+        Poll interval (seconds)
+        <input type="number" id="new-interval" value="60" min="10" max="3600">
+      </label>
+    </div>
+    <button type="submit">Add Sensor</button>
+  </form>
+</article>
+
+<article>
+  <h4>Graph Settings</h4>
+  <form onsubmit="submitGraphConfig(event)">
+    <div class="grid">
+      <label>
+        Regeneration interval (seconds)
+        <input type="number" id="regen-interval" value="{{ regen_interval }}" min="30">
+      </label>
+      <label>
+        Graph width (px)
+        <input type="number" id="graph-width" value="{{ graph_width }}" min="400" max="3000">
+      </label>
+      <label>
+        Graph height (px)
+        <input type="number" id="graph-height" value="{{ graph_height }}" min="50" max="1500">
+      </label>
+      <label>
+        Temperature unit
+        <select id="temp-unit">
+          <option value="celsius"{% if !temp_unit_is_fahrenheit %} selected{% endif %}>Celsius (°C)</option>
+          <option value="fahrenheit"{% if temp_unit_is_fahrenheit %} selected{% endif %}>Fahrenheit (°F)</option>
+        </select>
+      </label>
+    </div>
+    <button type="submit">Save Graph Settings</button>
+  </form>
+</article>
+
+<article>
+  <h4>Maintenance</h4>
+  <p class="muted">Danger zone — these actions are irreversible.</p>
+  <div class="grid">
+    <div>
+      <button class="contrast" onclick="resetRrds()">Reset All RRD Files</button>
+      <small>Deletes and recreates every sensor's RRD file. <strong>All historical data will be lost.</strong></small>
+    </div>
+    <div>
+      <button class="secondary" onclick="regenGraphs()">Force Regenerate Graphs</button>
+      <small>Immediately regenerates all pre-rendered graphs for all sensors.</small>
+    </div>
+  </div>
+</article>
+
+<dialog id="edit-dialog">
+  <article>
+    <h4>Edit Sensor</h4>
+    <input type="hidden" id="edit-id">
+    <div class="grid">
+      <label>
+        Name
+        <input type="text" id="edit-name">
+      </label>
+      <label>
+        Base URL
+        <input type="url" id="edit-url">
+      </label>
+      <label>
+        Poll interval (seconds)
+        <input type="number" id="edit-interval" min="10" max="3600">
+      </label>
+      <label>
+        <input type="checkbox" id="edit-enabled"> Enabled
+      </label>
+    </div>
+    <footer>
+      <button onclick="saveEdit()">Save</button>
+      <button class="secondary" onclick="document.getElementById('edit-dialog').close()">Cancel</button>
+    </footer>
+  </article>
+</dialog>
+
+<script>
+async function submitSensor(e) {
+  e.preventDefault();
+  const resp = await fetch('/api/sensors', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: document.getElementById('new-name').value,
+      base_url: document.getElementById('new-url').value,
+      poll_interval_secs: parseInt(document.getElementById('new-interval').value),
+      enabled: true,
+    }),
+  });
+  if (resp.ok) location.reload();
+  else alert('Error: ' + (await resp.json()).error);
+}
+
+function editSensor(id, name, url, interval, enabled) {
+  document.getElementById('edit-id').value = id;
+  document.getElementById('edit-name').value = name;
+  document.getElementById('edit-url').value = url;
+  document.getElementById('edit-interval').value = interval;
+  document.getElementById('edit-enabled').checked = enabled;
+  document.getElementById('edit-dialog').showModal();
+}
+
+async function saveEdit() {
+  const id = document.getElementById('edit-id').value;
+  const resp = await fetch(`/api/sensors/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: document.getElementById('edit-name').value,
+      base_url: document.getElementById('edit-url').value,
+      poll_interval_secs: parseInt(document.getElementById('edit-interval').value),
+      enabled: document.getElementById('edit-enabled').checked,
+    }),
+  });
+  if (resp.ok) location.reload();
+  else alert('Error: ' + (await resp.json()).error);
+}
+
+async function resetRrds() {
+  if (!confirm('This will permanently delete ALL historical sensor data. This cannot be undone.\n\nAre you sure?')) return;
+  const resp = await fetch('/api/admin/reset-rrds', { method: 'POST' });
+  const data = await resp.json();
+  if (data.status === 'ok') alert('All RRD files have been recreated. Historical data has been cleared.');
+  else alert('Completed with errors:\n' + (data.errors || []).join('\n'));
+}
+
+async function regenGraphs() {
+  const btn = event.target;
+  btn.disabled = true;
+  btn.textContent = 'Regenerating…';
+  const resp = await fetch('/api/admin/regenerate-graphs', { method: 'POST' });
+  const data = await resp.json();
+  btn.disabled = false;
+  btn.textContent = 'Force Regenerate Graphs';
+  if (data.status === 'ok') alert('Graphs regenerated successfully.');
+  else alert('Completed with errors:\n' + (data.errors || []).join('\n'));
+}
+
+async function submitGraphConfig(e) {
+  e.preventDefault();
+  const resp = await fetch('/api/config', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      regeneration_interval_secs: parseInt(document.getElementById('regen-interval').value),
+      width: parseInt(document.getElementById('graph-width').value),
+      height: parseInt(document.getElementById('graph-height').value),
+      temp_unit: document.getElementById('temp-unit').value,
+    }),
+  });
+  if (resp.ok) { alert('Graph settings saved. Regenerate graphs to apply the temperature unit change.'); location.reload(); }
+  else alert('Error saving settings.');
+}
+</script>
+{% endblock %}

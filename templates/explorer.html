@@ -1,0 +1,81 @@
+{% extends "layout.html" %}
+
+{% block title %}Graph Explorer — AirGradient Monitor{% endblock %}
+
+{% block content %}
+<h2>Graph Explorer</h2>
+<p class="muted">Build custom interactive charts from your sensor data.</p>
+
+<article>
+  <div class="grid">
+    <label>
+      Sensors
+      <select id="exp-sensor" multiple size="4">
+        {% for (id, name) in sensor_ids %}
+        <option value="{{ id }}">{{ name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <label>
+      Metrics
+      <select id="exp-metrics" multiple size="4">
+        {% for ds in ds_names %}
+        <option value="{{ ds }}"{% if ds == "pm02" || ds == "rco2" || ds == "atmp" || ds == "rhum" %} selected{% endif %}>{{ ds }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <fieldset>
+      <legend>Time Range</legend>
+      <label><input type="radio" name="range-preset" value="48h" checked> 48 Hours</label>
+      <label><input type="radio" name="range-preset" value="2w"> 2 Weeks</label>
+      <label><input type="radio" name="range-preset" value="1m"> 1 Month</label>
+      <label><input type="radio" name="range-preset" value="1y"> 1 Year</label>
+      <label><input type="radio" name="range-preset" value="5y"> 5 Years</label>
+      <label><input type="radio" name="range-preset" value="custom"> Custom</label>
+      <div id="custom-range" style="display:none; margin-top:0.5rem">
+        <input type="datetime-local" id="range-from">
+        <input type="datetime-local" id="range-to">
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Consolidation</legend>
+      <label><input type="radio" name="cf" value="AVERAGE" checked> Average</label>
+      <label><input type="radio" name="cf" value="MIN"> Min</label>
+      <label><input type="radio" name="cf" value="MAX"> Max</label>
+    </fieldset>
+  </div>
+
+  <button onclick="buildChart()">Build Chart</button>
+</article>
+
+<article id="chart-container" style="display:none">
+  <canvas id="exp-chart" height="120"></canvas>
+  <p class="muted" id="chart-status"></p>
+  <p><small>Tip: Scroll to zoom, drag to pan.</small></p>
+</article>
+
+<script src="/static/vendor/hammer.min.js"></script>
+<script src="/static/vendor/chart.umd.min.js"></script>
+<script src="/static/vendor/chartjs-plugin-zoom.min.js"></script>
+<script src="/static/js/explorer.js"></script>
+
+<script>
+// Pre-select sensor from query param if present
+const urlParams = new URLSearchParams(window.location.search);
+const preselect = urlParams.get('sensor');
+if (preselect) {
+  const opt = document.querySelector(`#exp-sensor option[value="${preselect}"]`);
+  if (opt) opt.selected = true;
+}
+
+document.querySelectorAll('input[name="range-preset"]').forEach(r => {
+  r.addEventListener('change', () => {
+    document.getElementById('custom-range').style.display =
+      r.value === 'custom' ? '' : 'none';
+  });
+});
+</script>
+{% endblock %}
