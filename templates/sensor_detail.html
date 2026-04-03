@@ -9,55 +9,54 @@
 {% if let Some(r) = sensor.latest_reading %}
 <article>
   <h4>Current Readings</h4>
-  <div class="readings-grid large">
-    <div class="reading">
-      <span class="label">PM1.0</span>
-      <span class="value">{% if let Some(v) = r.pm01 %}{{ format!("{:.1}", v) }} <small>ug/m3</small>{% else %}—{% endif %}</span>
-    </div>
-    <div class="reading">
-      <span class="label">PM2.5</span>
-      <span class="value">{% if let Some(v) = r.pm02 %}{{ format!("{:.1}", v) }} <small>ug/m3</small>{% else %}—{% endif %}</span>
-    </div>
-    <div class="reading">
-      <span class="label">PM10</span>
-      <span class="value">{% if let Some(v) = r.pm10 %}{{ format!("{:.1}", v) }} <small>ug/m3</small>{% else %}—{% endif %}</span>
-    </div>
-    <div class="reading">
-      <span class="label">CO₂</span>
-      <span class="value">{% if let Some(v) = r.rco2 %}{{ format!("{:.0}", v) }} <small>ppm</small>{% else %}—{% endif %}</span>
-    </div>
-    <div class="reading">
-      <span class="label">Temperature</span>
-      <span class="value">{% if let Some(v) = r.atmp %}{% if use_fahrenheit %}{{ format!("{:.1}", *v * 9.0 / 5.0 + 32.0) }} <small>°F</small>{% else %}{{ format!("{:.1}", *v) }} <small>°C</small>{% endif %}{% else %}—{% endif %}</span>
-    </div>
-    <div class="reading">
-      <span class="label">Humidity</span>
-      <span class="value">{% if let Some(v) = r.rhum %}{{ format!("{:.0}", v) }}<small>%</small>{% else %}—{% endif %}</span>
-    </div>
-    <div class="reading">
-      <span class="label">VOC Index</span>
-      <span class="value">{% if let Some(v) = r.tvoc_index %}{{ format!("{:.0}", v) }}{% else %}—{% endif %}</span>
-    </div>
-    <div class="reading">
-      <span class="label">NOx Index</span>
-      <span class="value">{% if let Some(v) = r.nox_index %}{{ format!("{:.0}", v) }}{% else %}—{% endif %}</span>
-    </div>
-    <div class="reading">
-      <span class="label">WiFi RSSI</span>
-      <span class="value">{% if let Some(v) = r.wifi %}{{ v }} <small>dBm</small>{% else %}—{% endif %}</span>
-    </div>
-    <div class="reading">
-      <span class="label">Firmware</span>
-      <span class="value">{% if let Some(v) = r.firmware %}{{ v }}{% else %}—{% endif %}</span>
-    </div>
-    <div class="reading">
-      <span class="label">Model</span>
-      <span class="value">{% if let Some(v) = r.model %}{{ v }}{% else %}—{% endif %}</span>
-    </div>
-    <div class="reading">
-      <span class="label">Serial</span>
-      <span class="value muted"><small>{% if let Some(v) = r.serialno %}{{ v }}{% else %}—{% endif %}</small></span>
-    </div>
+
+  <p class="readings-section-label">Particulate Matter (ug/m3)</p>
+  <div class="readings-grid compact">
+    <div class="reading"><span class="label">PM1.0</span><span class="value">{% if let Some(v) = r.pm01 %}{{ format!("{:.1}", v) }}{% else %}—{% endif %}</span></div>
+    <div class="reading"><span class="label">PM2.5</span><span class="value">{% if let Some(v) = r.pm02 %}{{ format!("{:.1}", v) }}{% else %}—{% endif %}</span></div>
+    <div class="reading"><span class="label">PM10</span><span class="value">{% if let Some(v) = r.pm10 %}{{ format!("{:.1}", v) }}{% else %}—{% endif %}</span></div>
+    <div class="reading"><span class="label">PM1.0 Std</span><span class="value">{% if let Some(v) = r.pm01_standard %}{{ format!("{:.1}", v) }}{% else %}—{% endif %}</span></div>
+    <div class="reading"><span class="label">PM2.5 Std</span><span class="value">{% if let Some(v) = r.pm02_standard %}{{ format!("{:.1}", v) }}{% else %}—{% endif %}</span></div>
+    <div class="reading"><span class="label">PM10 Std</span><span class="value">{% if let Some(v) = r.pm10_standard %}{{ format!("{:.1}", v) }}{% else %}—{% endif %}</span></div>
+    <div class="reading"><span class="label">PM2.5 Comp</span><span class="value">{% if let Some(v) = r.pm02_compensated %}{{ format!("{:.1}", v) }}{% else %}—{% endif %}</span></div>
+  </div>
+
+  <p class="readings-section-label">Particle Counts (#/dl)</p>
+  <div class="readings-grid compact">
+    <div class="reading"><span class="label">0.3 um</span><span class="value">{% if let Some(v) = r.pm003_count %}{{ format!("{:.0}", v) }}{% else %}—{% endif %}</span></div>
+    <div class="reading"><span class="label">0.5 um</span><span class="value">{% if let Some(v) = r.pm005_count %}{{ format!("{:.0}", v) }}{% else %}—{% endif %}</span></div>
+    <div class="reading"><span class="label">1.0 um</span><span class="value">{% if let Some(v) = r.pm01_count %}{{ format!("{:.0}", v) }}{% else %}—{% endif %}</span></div>
+    <div class="reading"><span class="label">2.0 um</span><span class="value">{% if let Some(v) = r.pm02_count %}{{ format!("{:.0}", v) }}{% else %}—{% endif %}</span></div>
+    <div class="reading"><span class="label">5.0 um</span><span class="value">{% if let Some(v) = r.pm50_count %}{{ format!("{:.0}", v) }}{% else %}—{% endif %}</span></div>
+    <div class="reading"><span class="label">10 um</span><span class="value">{% if let Some(v) = r.pm10_count %}{{ format!("{:.0}", v) }}{% else %}—{% endif %}</span></div>
+  </div>
+
+  <p class="readings-section-label">Atmospheric</p>
+  <div class="readings-grid compact">
+    <div class="reading"><span class="label">Temp</span><span class="value">{% if let Some(v) = r.atmp %}{% if use_fahrenheit %}{{ format!("{:.1}", *v * 9.0 / 5.0 + 32.0) }} <small>°F</small>{% else %}{{ format!("{:.1}", *v) }} <small>°C</small>{% endif %}{% else %}—{% endif %}</span></div>
+    <div class="reading"><span class="label">Temp Comp</span><span class="value">{% if let Some(v) = r.atmp_compensated %}{% if use_fahrenheit %}{{ format!("{:.1}", *v * 9.0 / 5.0 + 32.0) }} <small>°F</small>{% else %}{{ format!("{:.1}", *v) }} <small>°C</small>{% endif %}{% else %}—{% endif %}</span></div>
+    <div class="reading"><span class="label">Humidity</span><span class="value">{% if let Some(v) = r.rhum %}{{ format!("{:.0}", v) }} <small>%</small>{% else %}—{% endif %}</span></div>
+    <div class="reading"><span class="label">Hum Comp</span><span class="value">{% if let Some(v) = r.rhum_compensated %}{{ format!("{:.0}", v) }} <small>%</small>{% else %}—{% endif %}</span></div>
+  </div>
+
+  <p class="readings-section-label">Chemical</p>
+  <div class="readings-grid compact">
+    <div class="reading"><span class="label">CO₂</span><span class="value">{% if let Some(v) = r.rco2 %}{{ format!("{:.0}", v) }} <small>ppm</small>{% else %}—{% endif %}</span></div>
+    <div class="reading"><span class="label">VOC Index</span><span class="value">{% if let Some(v) = r.tvoc_index %}{{ format!("{:.0}", v) }}{% else %}—{% endif %}</span></div>
+    <div class="reading"><span class="label">VOC Raw</span><span class="value">{% if let Some(v) = r.tvoc_raw %}{{ format!("{:.0}", v) }}{% else %}—{% endif %}</span></div>
+    <div class="reading"><span class="label">NOx Index</span><span class="value">{% if let Some(v) = r.nox_index %}{{ format!("{:.0}", v) }}{% else %}—{% endif %}</span></div>
+    <div class="reading"><span class="label">NOx Raw</span><span class="value">{% if let Some(v) = r.nox_raw %}{{ format!("{:.0}", v) }}{% else %}—{% endif %}</span></div>
+  </div>
+
+  <p class="readings-section-label">Device</p>
+  <div class="readings-grid compact">
+    <div class="reading"><span class="label">WiFi RSSI</span><span class="value">{% if let Some(v) = r.wifi %}{{ v }} <small>dBm</small>{% else %}—{% endif %}</span></div>
+    <div class="reading"><span class="label">Boot Count</span><span class="value">{% if let Some(v) = r.boot_count %}{{ v }}{% else %}—{% endif %}</span></div>
+    <div class="reading"><span class="label">Uptime</span><span class="value">{% if let Some(v) = r.boot %}{{ v }} <small>s</small>{% else %}—{% endif %}</span></div>
+    <div class="reading"><span class="label">LED Mode</span><span class="value">{% if let Some(v) = r.led_mode %}{{ v }}{% else %}—{% endif %}</span></div>
+    <div class="reading"><span class="label">Firmware</span><span class="value">{% if let Some(v) = r.firmware %}{{ v }}{% else %}—{% endif %}</span></div>
+    <div class="reading"><span class="label">Model</span><span class="value">{% if let Some(v) = r.model %}{{ v }}{% else %}—{% endif %}</span></div>
+    <div class="reading"><span class="label">Serial</span><span class="value muted">{% if let Some(v) = r.serialno %}{{ v }}{% else %}—{% endif %}</span></div>
   </div>
 </article>
 {% endif %}

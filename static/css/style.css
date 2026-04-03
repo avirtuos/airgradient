@@ -47,9 +47,10 @@ nav a {
   margin-bottom: 0.5rem;
 }
 
-.readings-grid.large {
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.5rem 1rem;
+.readings-grid.compact {
+  grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+  gap: 0.2rem 0.75rem;
+  margin-bottom: 0.75rem;
 }
 
 .reading {
@@ -58,14 +59,14 @@ nav a {
 }
 
 .reading .label {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   color: var(--pico-muted-color);
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
 
 .reading .value {
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   font-weight: 600;
 }
 
@@ -73,6 +74,17 @@ nav a {
   font-size: 0.65rem;
   font-weight: 400;
   color: var(--pico-muted-color);
+}
+
+.readings-section-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--pico-muted-color);
+  margin: 0.5rem 0 0.25rem;
+  border-bottom: 1px solid var(--pico-muted-border-color);
+  padding-bottom: 0.1rem;
 }
 
 /* Thumbnail graph inside card */

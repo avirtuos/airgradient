@@ -35,13 +35,34 @@ Then open http://localhost:8080, go to **Settings**, and add your first sensor.
 ```yaml
 services:
   airgradient:
-    image: ghcr.io/<owner>/airgradient:latest
+    image: ghcr.io/avirtuos/airgradient:latest
     ports:
       - "8080:8080"
     volumes:
       - ./data:/data
     restart: unless-stopped
 ```
+
+### Portainer Stack
+
+In Portainer, go to **Stacks → Add stack**, choose **Web editor**, and paste:
+
+```yaml
+version: "3.8"
+services:
+  airgradient:
+    image: ghcr.io/avirtuos/airgradient:latest
+    container_name: airgradient
+    ports:
+      - "8080:8080"
+    volumes:
+      - /opt/airgradient/data:/data
+    environment:
+      - AIRGRADIENT_CONFIG=/data/config.toml
+    restart: unless-stopped
+```
+
+> **Note:** Change `/opt/airgradient/data` to any host path you want to persist RRD files and graphs. The directory will be created automatically on first run.
 
 ### Build from source
 
