@@ -147,6 +147,30 @@ nav a {
   color: var(--pico-muted-color);
 }
 
+/* Auto-refresh controls */
+.refresh-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+}
+
+.refresh-controls label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0;
+  cursor: pointer;
+}
+
+.refresh-controls select {
+  width: auto;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.85rem;
+  margin-bottom: 0;
+}
+
 footer.container-fluid {
   margin-top: 2rem;
   padding: 1rem;

@@ -75,6 +75,18 @@
     {% endfor %}
   </div>
 
+  <div class="refresh-controls">
+    <label>
+      <input type="checkbox" id="autorefresh-toggle">
+      Auto-refresh graphs
+    </label>
+    <select id="autorefresh-interval" title="Refresh interval">
+      <option value="60">every 1 min</option>
+      <option value="300">every 5 min</option>
+      <option value="600">every 10 min</option>
+    </select>
+  </div>
+
   {% for range in ranges %}
   <div class="range-panel" id="range-{{ range.slug() }}" {% if !loop.first %}style="display:none"{% endif %}>
     {% for cat in categories %}
@@ -97,5 +109,55 @@ function selectRange(slug, btn) {
   document.getElementById('range-' + slug).style.display = '';
   btn.classList.add('active');
 }
+
+(function () {
+  const toggleEl   = document.getElementById('autorefresh-toggle');
+  const intervalEl = document.getElementById('autorefresh-interval');
+  let timer = null;
+
+  function loadPrefs() {
+    const enabled  = localStorage.getItem('ag-autorefresh-enabled') === 'true';
+    const interval = localStorage.getItem('ag-autorefresh-interval') || '60';
+    toggleEl.checked = enabled;
+    intervalEl.value = interval;
+    intervalEl.disabled = !enabled;
+    return { enabled, interval: parseInt(interval, 10) };
+  }
+
+  function refreshVisibleGraphs() {
+    const activePanel = document.querySelector('.range-panel[style=""]') ||
+                        document.querySelector('.range-panel:not([style])');
+    if (!activePanel) return;
+    const ts = Date.now();
+    activePanel.querySelectorAll('img.rrd-graph').forEach(img => {
+      const base = img.src.split('?')[0];
+      img.src = base + '?t=' + ts;
+    });
+  }
+
+  function startTimer(seconds) {
+    stopTimer();
+    timer = setInterval(refreshVisibleGraphs, seconds * 1000);
+  }
+
+  function stopTimer() {
+    if (timer !== null) { clearInterval(timer); timer = null; }
+  }
+
+  function applyPrefs() {
+    const enabled  = toggleEl.checked;
+    const interval = parseInt(intervalEl.value, 10);
+    localStorage.setItem('ag-autorefresh-enabled', enabled);
+    localStorage.setItem('ag-autorefresh-interval', intervalEl.value);
+    intervalEl.disabled = !enabled;
+    if (enabled) { startTimer(interval); } else { stopTimer(); }
+  }
+
+  toggleEl.addEventListener('change', applyPrefs);
+  intervalEl.addEventListener('change', applyPrefs);
+
+  const { enabled, interval } = loadPrefs();
+  if (enabled) startTimer(interval);
+})();
 </script>
 {% endblock %}
