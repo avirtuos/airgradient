@@ -8,6 +8,7 @@ use std::sync::Mutex;
 use std::time::SystemTime;
 
 use anyhow::{Context, Result};
+use chrono::Local;
 use rrd::ops::graph::{
     self,
     elements::{self, GraphElement, VarName},
@@ -163,7 +164,11 @@ impl Grapher {
             ..Default::default()
         };
 
-        let elements = build_elements(&rrd_path, category, temp_unit);
+        let generated_at = Local::now()
+            .format("%Y-%m-%d %H:%M:%S %Z")
+            .to_string()
+            .replace(':', "\\:");
+        let elements = build_elements(&rrd_path, category, temp_unit, &generated_at);
 
         let _guard = self.lock.lock().unwrap();
         let (png_bytes, _meta) = graph::graph(props::ImageFormat::Png, &props, &elements)
@@ -340,8 +345,9 @@ fn build_elements(
     rrd_path: &Path,
     category: GraphCategory,
     temp_unit: TempUnit,
+    generated_at: &str,
 ) -> Vec<GraphElement> {
-    match category {
+    let mut els = match category {
         // Left (#/dl): pm003_count, pm005_count, pm01_count
         // Right (ug/m3): pm01, pm02, pm10  — scaled ×10 so they share the count axis visually
         // Left (#/dl): pm003_count, pm005_count, pm01_count
@@ -377,7 +383,6 @@ fn build_elements(
             els.extend(stat_els("pm10", "\\l"));
             els
         }
-
         // Left (ppm): rco2; plus tvoc_index scaled ×4 to approach CO2 ppm range.
         // Right (index 1-500): tvoc_index and nox_index — right_y_axis scale=0.25.
         GraphCategory::Chemical => {
@@ -450,7 +455,14 @@ fn build_elements(
             els.extend(stat_els("rhum_comp", "\\l"));
             els
         }
-    }
+    };
+    els.push(
+        elements::Comment {
+            text: format!("Generated at {}\\r", generated_at),
+        }
+        .into(),
+    );
+    els
 }
 
 /// Extract the first DNS label from a base URL.
