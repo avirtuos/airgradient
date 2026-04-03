@@ -183,6 +183,8 @@ impl Grapher {
     pub fn parse_range(slug: &str) -> Option<GraphRange> {
         match slug {
             "1h"  => Some(GraphRange::H1),
+            "12h" => Some(GraphRange::H12),
+            "24h" => Some(GraphRange::H24),
             "48h" => Some(GraphRange::H48),
             "2w"  => Some(GraphRange::W2),
             "1m"  => Some(GraphRange::M1),

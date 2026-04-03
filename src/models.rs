@@ -269,6 +269,8 @@ impl GraphCategory {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum GraphRange {
     H1,
+    H12,
+    H24,
     H48,
     W2,
     M1,
@@ -280,6 +282,8 @@ impl GraphRange {
     pub fn slug(&self) -> &'static str {
         match self {
             GraphRange::H1  => "1h",
+            GraphRange::H12 => "12h",
+            GraphRange::H24 => "24h",
             GraphRange::H48 => "48h",
             GraphRange::W2  => "2w",
             GraphRange::M1  => "1m",
@@ -291,6 +295,8 @@ impl GraphRange {
     pub fn label(&self) -> &'static str {
         match self {
             GraphRange::H1  => "1 Hour",
+            GraphRange::H12 => "12 Hours",
+            GraphRange::H24 => "24 Hours",
             GraphRange::H48 => "48 Hours",
             GraphRange::W2  => "2 Weeks",
             GraphRange::M1  => "1 Month",
@@ -303,6 +309,8 @@ impl GraphRange {
     pub fn duration(&self) -> std::time::Duration {
         match self {
             GraphRange::H1  => std::time::Duration::from_secs(3600),
+            GraphRange::H12 => std::time::Duration::from_secs(12 * 3600),
+            GraphRange::H24 => std::time::Duration::from_secs(24 * 3600),
             GraphRange::H48 => std::time::Duration::from_secs(48 * 3600),
             GraphRange::W2  => std::time::Duration::from_secs(14 * 86400),
             GraphRange::M1  => std::time::Duration::from_secs(30 * 86400),
@@ -314,6 +322,8 @@ impl GraphRange {
     pub fn all() -> &'static [GraphRange] {
         &[
             GraphRange::H1,
+            GraphRange::H12,
+            GraphRange::H24,
             GraphRange::H48,
             GraphRange::W2,
             GraphRange::M1,
