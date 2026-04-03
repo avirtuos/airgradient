@@ -63,13 +63,19 @@ pub struct SensorCard {
 pub async fn dashboard(State(state): State<AppState>) -> impl IntoResponse {
     let use_fahrenheit = state.config.read().await.graphs.temp_unit.is_fahrenheit();
     let cards = build_cards(&state).await;
-    render(DashboardTemplate { sensors: cards, use_fahrenheit })
+    render(DashboardTemplate {
+        sensors: cards,
+        use_fahrenheit,
+    })
 }
 
 pub async fn partial_sensor_cards(State(state): State<AppState>) -> impl IntoResponse {
     let use_fahrenheit = state.config.read().await.graphs.temp_unit.is_fahrenheit();
     let cards = build_cards(&state).await;
-    render(SensorCardsPartial { sensors: cards, use_fahrenheit })
+    render(SensorCardsPartial {
+        sensors: cards,
+        use_fahrenheit,
+    })
 }
 
 pub async fn sensor_detail(
@@ -115,7 +121,10 @@ pub async fn explorer(State(state): State<AppState>) -> impl IntoResponse {
 
     render(ExplorerTemplate {
         sensor_ids,
-        ds_names: crate::models::RRD_DS_NAMES.iter().map(|s| s.to_string()).collect(),
+        ds_names: crate::models::RRD_DS_NAMES
+            .iter()
+            .map(|s| s.to_string())
+            .collect(),
     })
 }
 
@@ -127,16 +136,19 @@ pub async fn settings(State(state): State<AppState>) -> impl IntoResponse {
         .sensors
         .iter()
         .map(|s| {
-            statuses.get(&s.id).cloned().unwrap_or_else(|| SensorStatus {
-                id: s.id.clone(),
-                name: s.name.clone(),
-                base_url: s.base_url.clone(),
-                poll_interval_secs: s.poll_interval_secs,
-                enabled: s.enabled,
-                last_seen: None,
-                last_error: None,
-                latest_reading: None,
-            })
+            statuses
+                .get(&s.id)
+                .cloned()
+                .unwrap_or_else(|| SensorStatus {
+                    id: s.id.clone(),
+                    name: s.name.clone(),
+                    base_url: s.base_url.clone(),
+                    poll_interval_secs: s.poll_interval_secs,
+                    enabled: s.enabled,
+                    last_seen: None,
+                    last_error: None,
+                    latest_reading: None,
+                })
         })
         .collect();
 

@@ -78,7 +78,11 @@ impl RrdStore {
 
         let mut archives: Vec<create::Archive> = Vec::new();
         for &(steps, rows) in &[(1u32, 2880u32), (5, 4032), (10, 4320), (60, 43800)] {
-            for &cf in &[ConsolidationFn::Avg, ConsolidationFn::Min, ConsolidationFn::Max] {
+            for &cf in &[
+                ConsolidationFn::Avg,
+                ConsolidationFn::Min,
+                ConsolidationFn::Max,
+            ] {
                 archives.push(
                     create::Archive::new(cf, 0.5, steps, rows)
                         .context("Failed to create RRA definition")?,
@@ -95,9 +99,9 @@ impl RrdStore {
             &path,
             start,
             Duration::from_secs(STEP_SECS),
-            true,  // no_overwrite
-            None,  // no template
-            &[],   // no sources
+            true, // no_overwrite
+            None, // no template
+            &[],  // no sources
             &data_sources,
             &archives,
         )
@@ -168,9 +172,8 @@ impl RrdStore {
         let resolution = Duration::from_secs(step_secs.max(STEP_SECS));
 
         let _guard = self.lock.lock().unwrap();
-        let data =
-            fetch::fetch(&path, cf_enum, start, end, resolution)
-                .with_context(|| format!("rrd_fetch failed for {sensor_id}"))?;
+        let data = fetch::fetch(&path, cf_enum, start, end, resolution)
+            .with_context(|| format!("rrd_fetch failed for {sensor_id}"))?;
 
         let step_secs = data.step().as_secs();
         let ds_names = data.ds_names().to_vec();

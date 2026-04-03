@@ -179,7 +179,6 @@ impl TempUnit {
     pub fn is_fahrenheit(self) -> bool {
         self == TempUnit::Fahrenheit
     }
-
 }
 
 /// Graph configuration
@@ -281,41 +280,41 @@ pub enum GraphRange {
 impl GraphRange {
     pub fn slug(&self) -> &'static str {
         match self {
-            GraphRange::H1  => "1h",
+            GraphRange::H1 => "1h",
             GraphRange::H12 => "12h",
             GraphRange::H24 => "24h",
             GraphRange::H48 => "48h",
-            GraphRange::W2  => "2w",
-            GraphRange::M1  => "1m",
-            GraphRange::Y1  => "1y",
-            GraphRange::Y5  => "5y",
+            GraphRange::W2 => "2w",
+            GraphRange::M1 => "1m",
+            GraphRange::Y1 => "1y",
+            GraphRange::Y5 => "5y",
         }
     }
 
     pub fn label(&self) -> &'static str {
         match self {
-            GraphRange::H1  => "1 Hour",
+            GraphRange::H1 => "1 Hour",
             GraphRange::H12 => "12 Hours",
             GraphRange::H24 => "24 Hours",
             GraphRange::H48 => "48 Hours",
-            GraphRange::W2  => "2 Weeks",
-            GraphRange::M1  => "1 Month",
-            GraphRange::Y1  => "1 Year",
-            GraphRange::Y5  => "5 Years",
+            GraphRange::W2 => "2 Weeks",
+            GraphRange::M1 => "1 Month",
+            GraphRange::Y1 => "1 Year",
+            GraphRange::Y5 => "5 Years",
         }
     }
 
     /// Duration back from now that this range covers
     pub fn duration(&self) -> std::time::Duration {
         match self {
-            GraphRange::H1  => std::time::Duration::from_secs(3600),
+            GraphRange::H1 => std::time::Duration::from_secs(3600),
             GraphRange::H12 => std::time::Duration::from_secs(12 * 3600),
             GraphRange::H24 => std::time::Duration::from_secs(24 * 3600),
             GraphRange::H48 => std::time::Duration::from_secs(48 * 3600),
-            GraphRange::W2  => std::time::Duration::from_secs(14 * 86400),
-            GraphRange::M1  => std::time::Duration::from_secs(30 * 86400),
-            GraphRange::Y1  => std::time::Duration::from_secs(365 * 86400),
-            GraphRange::Y5  => std::time::Duration::from_secs(5 * 365 * 86400),
+            GraphRange::W2 => std::time::Duration::from_secs(14 * 86400),
+            GraphRange::M1 => std::time::Duration::from_secs(30 * 86400),
+            GraphRange::Y1 => std::time::Duration::from_secs(365 * 86400),
+            GraphRange::Y5 => std::time::Duration::from_secs(5 * 365 * 86400),
         }
     }
 

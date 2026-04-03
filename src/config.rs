@@ -64,7 +64,6 @@ impl AppConfig {
         std::fs::write(path, contents)?;
         Ok(())
     }
-
 }
 
 /// Resolve the config file path: CLI arg > env var > default

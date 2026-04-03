@@ -73,7 +73,16 @@ impl Grapher {
 
         for &category in GraphCategory::all() {
             for &range in GraphRange::all() {
-                if let Err(e) = self.generate_graph(sensor_id, sensor_name, base_url, category, range, width, height, temp_unit) {
+                if let Err(e) = self.generate_graph(
+                    sensor_id,
+                    sensor_name,
+                    base_url,
+                    category,
+                    range,
+                    width,
+                    height,
+                    temp_unit,
+                ) {
                     tracing::warn!(
                         "Failed to generate {}/{} graph for {sensor_id}: {e}",
                         category.slug(),
@@ -97,9 +106,9 @@ impl Grapher {
         temp_unit: TempUnit,
     ) -> Result<()> {
         let rrd_path = self.rrd_path(sensor_id);
-        let out_path = self
-            .graph_dir(sensor_id)
-            .join(format!("{}_{}.png", category.slug(), range.slug()));
+        let out_path =
+            self.graph_dir(sensor_id)
+                .join(format!("{}_{}.png", category.slug(), range.slug()));
 
         info!("Generating graph {}", out_path.display());
 
@@ -134,7 +143,9 @@ impl Grapher {
                     range.label(),
                 )),
                 vertical_label: Some(match (category, temp_unit) {
-                    (GraphCategory::Atmospheric, TempUnit::Fahrenheit) => "Temperature (\u{00b0}F)".to_string(),
+                    (GraphCategory::Atmospheric, TempUnit::Fahrenheit) => {
+                        "Temperature (\u{00b0}F)".to_string()
+                    }
                     _ => category.y_label().to_string(),
                 }),
             },
@@ -155,7 +166,13 @@ impl Grapher {
 
         let _guard = self.lock.lock().unwrap();
         let (png_bytes, _meta) = graph::graph(props::ImageFormat::Png, &props, &elements)
-            .with_context(|| format!("rrd_graph failed for {sensor_id}/{}/{}", category.slug(), range.slug()))?;
+            .with_context(|| {
+                format!(
+                    "rrd_graph failed for {sensor_id}/{}/{}",
+                    category.slug(),
+                    range.slug()
+                )
+            })?;
 
         std::fs::write(&out_path, &png_bytes)
             .with_context(|| format!("Failed to write graph PNG to {}", out_path.display()))?;
@@ -164,7 +181,12 @@ impl Grapher {
     }
 
     /// Return the filesystem path to a pre-rendered graph PNG.
-    pub fn graph_path(&self, sensor_id: &str, category: GraphCategory, range: GraphRange) -> PathBuf {
+    pub fn graph_path(
+        &self,
+        sensor_id: &str,
+        category: GraphCategory,
+        range: GraphRange,
+    ) -> PathBuf {
         self.graph_dir(sensor_id)
             .join(format!("{}_{}.png", category.slug(), range.slug()))
     }
@@ -182,14 +204,14 @@ impl Grapher {
     /// Parse range slug → GraphRange
     pub fn parse_range(slug: &str) -> Option<GraphRange> {
         match slug {
-            "1h"  => Some(GraphRange::H1),
+            "1h" => Some(GraphRange::H1),
             "12h" => Some(GraphRange::H12),
             "24h" => Some(GraphRange::H24),
             "48h" => Some(GraphRange::H48),
-            "2w"  => Some(GraphRange::W2),
-            "1m"  => Some(GraphRange::M1),
-            "1y"  => Some(GraphRange::Y1),
-            "5y"  => Some(GraphRange::Y5),
+            "2w" => Some(GraphRange::W2),
+            "1m" => Some(GraphRange::M1),
+            "1y" => Some(GraphRange::Y1),
+            "5y" => Some(GraphRange::Y5),
             _ => None,
         }
     }
@@ -266,22 +288,58 @@ fn line(v: VarName, r: u8, g: u8, b: u8, legend: &str) -> GraphElement {
 /// `line_end` is appended to the final GPRINT format (typically `"\\l"` to terminate the row).
 fn stat_els(stat_src: &str, line_end: &str) -> Vec<GraphElement> {
     let last_vn = vn(&format!("{}sl", stat_src));
-    let avg_vn  = vn(&format!("{}sa", stat_src));
-    let min_vn  = vn(&format!("{}sn", stat_src));
-    let max_vn  = vn(&format!("{}sx", stat_src));
+    let avg_vn = vn(&format!("{}sa", stat_src));
+    let min_vn = vn(&format!("{}sn", stat_src));
+    let max_vn = vn(&format!("{}sx", stat_src));
     vec![
-        elements::VDef { var_name: last_vn.clone(), rpn: format!("{},LAST",    stat_src) }.into(),
-        elements::VDef { var_name: avg_vn.clone(),  rpn: format!("{},AVERAGE", stat_src) }.into(),
-        elements::VDef { var_name: min_vn.clone(),  rpn: format!("{},MINIMUM", stat_src) }.into(),
-        elements::VDef { var_name: max_vn.clone(),  rpn: format!("{},MAXIMUM", stat_src) }.into(),
-        elements::GPrint { var_name: last_vn, format: "Last\\: %6.1lf ".to_string() }.into(),
-        elements::GPrint { var_name: avg_vn,  format: "Avg\\: %6.1lf ".to_string() }.into(),
-        elements::GPrint { var_name: min_vn,  format: "Min\\: %6.1lf ".to_string() }.into(),
-        elements::GPrint { var_name: max_vn,  format: format!("Max\\: %6.1lf{}", line_end) }.into(),
+        elements::VDef {
+            var_name: last_vn.clone(),
+            rpn: format!("{},LAST", stat_src),
+        }
+        .into(),
+        elements::VDef {
+            var_name: avg_vn.clone(),
+            rpn: format!("{},AVERAGE", stat_src),
+        }
+        .into(),
+        elements::VDef {
+            var_name: min_vn.clone(),
+            rpn: format!("{},MINIMUM", stat_src),
+        }
+        .into(),
+        elements::VDef {
+            var_name: max_vn.clone(),
+            rpn: format!("{},MAXIMUM", stat_src),
+        }
+        .into(),
+        elements::GPrint {
+            var_name: last_vn,
+            format: "Last\\: %6.1lf ".to_string(),
+        }
+        .into(),
+        elements::GPrint {
+            var_name: avg_vn,
+            format: "Avg\\: %6.1lf ".to_string(),
+        }
+        .into(),
+        elements::GPrint {
+            var_name: min_vn,
+            format: "Min\\: %6.1lf ".to_string(),
+        }
+        .into(),
+        elements::GPrint {
+            var_name: max_vn,
+            format: format!("Max\\: %6.1lf{}", line_end),
+        }
+        .into(),
     ]
 }
 
-fn build_elements(rrd_path: &Path, category: GraphCategory, temp_unit: TempUnit) -> Vec<GraphElement> {
+fn build_elements(
+    rrd_path: &Path,
+    category: GraphCategory,
+    temp_unit: TempUnit,
+) -> Vec<GraphElement> {
     match category {
         // Left (#/dl): pm003_count, pm005_count, pm01_count
         // Right (ug/m3): pm01, pm02, pm10  — scaled ×10 so they share the count axis visually
@@ -292,16 +350,15 @@ fn build_elements(rrd_path: &Path, category: GraphCategory, temp_unit: TempUnit)
             let (pm003, d_pm003) = def(rrd_path, "pm003_count");
             let (pm005, d_pm005) = def(rrd_path, "pm005_count");
             let (pm01c, d_pm01c) = def(rrd_path, "pm01_count");
-            let (_,     d_pm01)  = def(rrd_path, "pm01");
-            let (_,     d_pm02)  = def(rrd_path, "pm02");
-            let (_,     d_pm10)  = def(rrd_path, "pm10");
+            let (_, d_pm01) = def(rrd_path, "pm01");
+            let (_, d_pm02) = def(rrd_path, "pm02");
+            let (_, d_pm10) = def(rrd_path, "pm10");
             let (pm01s, c_pm01s) = cdef("pm01s", "pm01", "10,*");
             let (pm02s, c_pm02s) = cdef("pm02s", "pm02", "10,*");
             let (pm10s, c_pm10s) = cdef("pm10s", "pm10", "10,*");
 
             let mut els = vec![
-                d_pm003, d_pm005, d_pm01c, d_pm01, d_pm02, d_pm10,
-                c_pm01s, c_pm02s, c_pm10s,
+                d_pm003, d_pm005, d_pm01c, d_pm01, d_pm02, d_pm10, c_pm01s, c_pm02s, c_pm10s,
             ];
             // Counts (left axis)
             els.push(line(pm003, 0x00, 0xe5, 0xff, "0.3um #/dl (L)  "));
@@ -324,17 +381,17 @@ fn build_elements(rrd_path: &Path, category: GraphCategory, temp_unit: TempUnit)
         // Right (index 1-500): tvoc_index and nox_index — right_y_axis scale=0.25.
         GraphCategory::Chemical => {
             let (rco2, d_rco2) = def(rrd_path, "rco2");
-            let (_,    d_tvoc) = def(rrd_path, "tvoc_index");
-            let (_,    d_nox)  = def(rrd_path, "nox_index");
+            let (_, d_tvoc) = def(rrd_path, "tvoc_index");
+            let (_, d_nox) = def(rrd_path, "nox_index");
             let (tvocs, c_tvocs) = cdef("tvocs", "tvoc_index", "4,*");
-            let (noxs,  c_noxs)  = cdef("noxs",  "nox_index",  "4,*");
+            let (noxs, c_noxs) = cdef("noxs", "nox_index", "4,*");
 
             let mut els = vec![d_rco2, d_tvoc, d_nox, c_tvocs, c_noxs];
-            els.push(line(rco2,  0xf4, 0xa2, 0x61, "CO\u{2082} ppm (L)   "));
+            els.push(line(rco2, 0xf4, 0xa2, 0x61, "CO\u{2082} ppm (L)   "));
             els.extend(stat_els("rco2", "\\l"));
             els.push(line(tvocs, 0xff, 0xea, 0x00, "VOC Index (R)   "));
             els.extend(stat_els("tvoc_index", "\\l"));
-            els.push(line(noxs,  0x3a, 0x0c, 0xa3, "NOx Index (R)   "));
+            els.push(line(noxs, 0x3a, 0x0c, 0xa3, "NOx Index (R)   "));
             els.extend(stat_els("nox_index", "\\l"));
             els
         }
@@ -343,18 +400,25 @@ fn build_elements(rrd_path: &Path, category: GraphCategory, temp_unit: TempUnit)
         // Right (%): rhum, rhum_compensated — scaled ÷2 to map 0-100% onto the temp axis range;
         // right_y_axis scale=2.0 restores correct percentage labels on the right side.
         GraphCategory::Atmospheric => {
-            let (atmp,      d_atmp)      = def(rrd_path, "atmp");
+            let (atmp, d_atmp) = def(rrd_path, "atmp");
             let (atmp_comp, d_atmp_comp) = def(rrd_path, "atmp_comp");
-            let (_,         d_rhum)      = def(rrd_path, "rhum");
-            let (_,         d_rhum_comp) = def(rrd_path, "rhum_comp");
-            let (rhums,      c_rhums)      = cdef("rhums",     "rhum",      "2,/");
+            let (_, d_rhum) = def(rrd_path, "rhum");
+            let (_, d_rhum_comp) = def(rrd_path, "rhum_comp");
+            let (rhums, c_rhums) = cdef("rhums", "rhum", "2,/");
             let (rhum_comps, c_rhum_comps) = cdef("rhumcomps", "rhum_comp", "2,/");
 
-            let mut els = vec![d_atmp, d_atmp_comp, d_rhum, d_rhum_comp, c_rhums, c_rhum_comps];
+            let mut els = vec![
+                d_atmp,
+                d_atmp_comp,
+                d_rhum,
+                d_rhum_comp,
+                c_rhums,
+                c_rhum_comps,
+            ];
 
             // When Fahrenheit, convert via CDEF: F = C * 9 / 5 + 32
             let (t1, t1_stat, t2, t2_stat, unit_sym) = if temp_unit.is_fahrenheit() {
-                let (t1f, c_t1f) = cdef("atmpf",     "atmp",      "9,*,5,/,32,+");
+                let (t1f, c_t1f) = cdef("atmpf", "atmp", "9,*,5,/,32,+");
                 let (t2f, c_t2f) = cdef("atmpcompf", "atmp_comp", "9,*,5,/,32,+");
                 els.push(c_t1f);
                 els.push(c_t2f);
@@ -363,11 +427,23 @@ fn build_elements(rrd_path: &Path, category: GraphCategory, temp_unit: TempUnit)
                 (atmp, "atmp", atmp_comp, "atmp_comp", "\u{00b0}C")
             };
 
-            els.push(line(t1, 0xef, 0x23, 0x3c, &format!("Temp {} (L)      ", unit_sym)));
+            els.push(line(
+                t1,
+                0xef,
+                0x23,
+                0x3c,
+                &format!("Temp {} (L)      ", unit_sym),
+            ));
             els.extend(stat_els(t1_stat, "\\l"));
-            els.push(line(t2, 0xff, 0x70, 0x70, &format!("Temp Comp {} (L) ", unit_sym)));
+            els.push(line(
+                t2,
+                0xff,
+                0x70,
+                0x70,
+                &format!("Temp Comp {} (L) ", unit_sym),
+            ));
             els.extend(stat_els(t2_stat, "\\l"));
-            els.push(line(rhums,      0x4c, 0xc9, 0xf0, "Humidity % (R)      "));
+            els.push(line(rhums, 0x4c, 0xc9, 0xf0, "Humidity % (R)      "));
             els.extend(stat_els("rhum", "\\l"));
             els.push(line(rhum_comps, 0x00, 0x7a, 0xa5, "Humidity Comp % (R) "));
             els.extend(stat_els("rhum_comp", "\\l"));
@@ -379,7 +455,9 @@ fn build_elements(rrd_path: &Path, category: GraphCategory, temp_unit: TempUnit)
 /// Extract the first DNS label from a base URL.
 /// e.g. "http://air01.localdomain/measures/current" → "air01"
 fn parse_host(base_url: &str) -> &str {
-    let s = base_url.find("://").map_or(base_url, |i| &base_url[i + 3..]);
+    let s = base_url
+        .find("://")
+        .map_or(base_url, |i| &base_url[i + 3..]);
     let s = s.split('/').next().unwrap_or(s);
     let s = s.split(':').next().unwrap_or(s); // strip port
     s.split('.').next().unwrap_or(s)

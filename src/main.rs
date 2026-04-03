@@ -99,12 +99,22 @@ async fn main() -> anyhow::Result<()> {
 
                 let sensors: Vec<(String, String, String)> = {
                     let cfg = config_bg.read().await;
-                    cfg.sensors.iter().map(|s| (s.id.clone(), s.name.clone(), s.base_url.clone())).collect()
+                    cfg.sensors
+                        .iter()
+                        .map(|s| (s.id.clone(), s.name.clone(), s.base_url.clone()))
+                        .collect()
                 };
                 for (sensor_id, sensor_name, base_url) in sensors {
                     let g = Arc::clone(&grapher);
                     tokio::task::spawn_blocking(move || {
-                        if let Err(e) = g.regenerate_all(&sensor_id, &sensor_name, &base_url, width, height, temp_unit) {
+                        if let Err(e) = g.regenerate_all(
+                            &sensor_id,
+                            &sensor_name,
+                            &base_url,
+                            width,
+                            height,
+                            temp_unit,
+                        ) {
                             tracing::warn!("Graph regen failed for {sensor_id}: {e}");
                         }
                     })

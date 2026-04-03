@@ -76,16 +76,18 @@ impl PollManager {
                         // Update in-memory status
                         {
                             let mut map = statuses.write().await;
-                            let entry = map.entry(sensor_id.clone()).or_insert_with(|| SensorStatus {
-                                id: sensor_id.clone(),
-                                name: sensor_name.clone(),
-                                base_url: sensor_base_url.clone(),
-                                poll_interval_secs: sensor_interval,
-                                enabled: true,
-                                last_seen: None,
-                                last_error: None,
-                                latest_reading: None,
-                            });
+                            let entry =
+                                map.entry(sensor_id.clone())
+                                    .or_insert_with(|| SensorStatus {
+                                        id: sensor_id.clone(),
+                                        name: sensor_name.clone(),
+                                        base_url: sensor_base_url.clone(),
+                                        poll_interval_secs: sensor_interval,
+                                        enabled: true,
+                                        last_seen: None,
+                                        last_error: None,
+                                        latest_reading: None,
+                                    });
                             entry.last_seen = Some(now.timestamp());
                             entry.last_error = None;
                             entry.latest_reading = Some(reading.clone());
@@ -95,7 +97,9 @@ impl PollManager {
                         let sid = sensor_id.clone();
                         let rrd = Arc::clone(&rrd_store);
                         let ts = now.timestamp();
-                        match tokio::task::spawn_blocking(move || rrd.update(&sid, ts, &reading)).await {
+                        match tokio::task::spawn_blocking(move || rrd.update(&sid, ts, &reading))
+                            .await
+                        {
                             Ok(Err(e)) => error!("RRD update failed for {sensor_id}: {e}"),
                             Err(e) => error!("spawn_blocking panicked for {sensor_id}: {e}"),
                             Ok(Ok(())) => {}
@@ -104,16 +108,18 @@ impl PollManager {
                     Err(e) => {
                         warn!("Poll failed for {sensor_base_url}: {e}");
                         let mut map = statuses.write().await;
-                        let entry = map.entry(sensor_id.clone()).or_insert_with(|| SensorStatus {
-                            id: sensor_id.clone(),
-                            name: sensor_name.clone(),
-                            base_url: sensor_base_url.clone(),
-                            poll_interval_secs: sensor_interval,
-                            enabled: true,
-                            last_seen: None,
-                            last_error: None,
-                            latest_reading: None,
-                        });
+                        let entry = map
+                            .entry(sensor_id.clone())
+                            .or_insert_with(|| SensorStatus {
+                                id: sensor_id.clone(),
+                                name: sensor_name.clone(),
+                                base_url: sensor_base_url.clone(),
+                                poll_interval_secs: sensor_interval,
+                                enabled: true,
+                                last_seen: None,
+                                last_error: None,
+                                latest_reading: None,
+                            });
                         entry.last_error = Some(e.to_string());
                     }
                 }

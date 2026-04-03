@@ -240,7 +240,10 @@ pub async fn history(
     {
         let cfg = state.config.read().await;
         if !cfg.sensors.iter().any(|s| s.id == id) {
-            return Err((StatusCode::NOT_FOUND, Json(json!({ "error": "sensor not found" }))));
+            return Err((
+                StatusCode::NOT_FOUND,
+                Json(json!({ "error": "sensor not found" })),
+            ));
         }
     }
 
@@ -445,10 +448,17 @@ pub async fn reset_rrds(State(state): State<AppState>) -> Json<Value> {
 pub async fn regenerate_graphs(State(state): State<AppState>) -> Json<Value> {
     let (sensors, width, height, temp_unit) = {
         let cfg = state.config.read().await;
-        let sensors: Vec<(String, String, String)> = cfg.sensors.iter()
+        let sensors: Vec<(String, String, String)> = cfg
+            .sensors
+            .iter()
             .map(|s| (s.id.clone(), s.name.clone(), s.base_url.clone()))
             .collect();
-        (sensors, cfg.graphs.width, cfg.graphs.height, cfg.graphs.temp_unit)
+        (
+            sensors,
+            cfg.graphs.width,
+            cfg.graphs.height,
+            cfg.graphs.temp_unit,
+        )
     };
 
     let grapher = Arc::clone(&state.grapher);
